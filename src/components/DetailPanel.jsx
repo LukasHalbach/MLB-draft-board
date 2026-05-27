@@ -1,22 +1,144 @@
 import { useState, useEffect } from 'react'
 import { getGradeColor, GRADE_OPTIONS, GRADE_LABELS, formatStatValue, isPitcher, LEVEL_COLOR, getPositionGroup, POSITION_BADGE } from '../utils/stats'
 
-const STAT_LABELS = {
-  avg: 'AVG', obp: 'OBP', slg: 'SLG', ops: 'OPS', hr: 'HR', sb: 'SB', rbi: 'RBI',
-  era: 'ERA', ip: 'IP', k: 'K', bb: 'BB', velocity: 'Velo',
+function XIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M1 1l9 9M10 1L1 10" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M5.5 1v9M1 5.5h9" />
+    </svg>
+  )
+}
+
+function EditableStatsSection({ title, stats, onChange, defaultEmpty = false }) {
+  const [adding, setAdding] = useState(false)
+  const [newKey, setNewKey] = useState('')
+  const [newVal, setNewVal] = useState('')
+
+  const handleValueChange = (key, raw) => {
+    const parsed = raw === '' ? '' : !isNaN(raw) && raw.trim() !== '' ? Number(raw) : raw
+    onChange({ ...stats, [key]: parsed })
+  }
+
+  const handleDelete = key => {
+    const copy = { ...stats }
+    delete copy[key]
+    onChange(copy)
+  }
+
+  const handleAdd = () => {
+    const k = newKey.trim()
+    if (!k) return
+    const v = newVal === '' ? '' : !isNaN(newVal) && newVal.trim() !== '' ? Number(newVal) : newVal
+    onChange({ ...stats, [k]: v })
+    setNewKey('')
+    setNewVal('')
+    setAdding(false)
+  }
+
+  const entries = Object.entries(stats)
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</span>
+        {!adding && (
+          <button
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1 text-xs text-gray-600 hover:text-blue-400 transition-colors"
+          >
+            <PlusIcon />
+            Add field
+          </button>
+        )}
+      </div>
+
+      {entries.length === 0 && !adding && (
+        <p className="text-xs text-gray-700 italic">No stats yet — click Add field to start.</p>
+      )}
+
+      <div className="space-y-1.5">
+        {entries.map(([key, val]) => (
+          <div key={key} className="flex items-center gap-2">
+            <span className="text-xs text-gray-400 uppercase font-medium w-24 shrink-0 truncate" title={key}>
+              {key}
+            </span>
+            <input
+              type="text"
+              value={val === null || val === undefined ? '' : String(val)}
+              onChange={e => handleValueChange(key, e.target.value)}
+              className="flex-1 min-w-0 bg-gray-800 border border-gray-700 text-white rounded px-2 py-1 text-sm font-mono focus:outline-none focus:border-blue-500"
+            />
+            <button
+              onClick={() => handleDelete(key)}
+              className="shrink-0 p-1 text-gray-700 hover:text-red-400 transition-colors"
+              title="Remove field"
+            >
+              <XIcon />
+            </button>
+          </div>
+        ))}
+
+        {adding && (
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={newKey}
+              onChange={e => setNewKey(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="field name"
+              autoFocus
+              className="w-24 shrink-0 bg-gray-800 border border-blue-600 text-white rounded px-2 py-1 text-xs focus:outline-none placeholder-gray-600"
+            />
+            <input
+              type="text"
+              value={newVal}
+              onChange={e => setNewVal(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="value"
+              className="flex-1 min-w-0 bg-gray-800 border border-blue-600 text-white rounded px-2 py-1 text-xs font-mono focus:outline-none placeholder-gray-600"
+            />
+            <button
+              onClick={handleAdd}
+              className="shrink-0 px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium transition-colors"
+            >
+              Add
+            </button>
+            <button
+              onClick={() => { setAdding(false); setNewKey(''); setNewVal('') }}
+              className="shrink-0 p-1 text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              <XIcon />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
   const [notes, setNotes] = useState(prospect.notes || '')
   const [grade, setGrade] = useState(prospect.grade || 50)
+  const [stats, setStats] = useState(prospect.stats || {})
+  const [defenseStats, setDefenseStats] = useState(prospect.defenseStats || {})
 
-  // Reset when prospect changes
+  // Reset all local state when switching prospects
   useEffect(() => {
     setNotes(prospect.notes || '')
     setGrade(prospect.grade || 50)
+    setStats(prospect.stats || {})
+    setDefenseStats(prospect.defenseStats || {})
   }, [prospect.id])
 
-  // Debounce notes save
+  // Debounce notes
   useEffect(() => {
     const t = setTimeout(() => {
       if (notes !== (prospect.notes || '')) {
@@ -26,6 +148,22 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
     return () => clearTimeout(t)
   }, [notes])
 
+  // Debounce stats
+  useEffect(() => {
+    const t = setTimeout(() => {
+      onUpdate(prospect.id, { stats })
+    }, 400)
+    return () => clearTimeout(t)
+  }, [stats])
+
+  // Debounce defense stats
+  useEffect(() => {
+    const t = setTimeout(() => {
+      onUpdate(prospect.id, { defenseStats })
+    }, 400)
+    return () => clearTimeout(t)
+  }, [defenseStats])
+
   const handleGradeChange = val => {
     setGrade(val)
     onUpdate(prospect.id, { grade: val })
@@ -33,6 +171,7 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
 
   const { bg, text } = getGradeColor(grade)
   const posGroup = getPositionGroup(prospect.position)
+  const pitcher = isPitcher(prospect.position)
 
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden flex flex-col">
@@ -97,24 +236,23 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
           </div>
         </div>
 
-        {/* Stats */}
-        {prospect.stats && Object.keys(prospect.stats).length > 0 && (
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              {isPitcher(prospect.position) ? 'Pitching Stats' : 'Hitting Stats'}
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {Object.entries(prospect.stats).map(([key, val]) => (
-                <div key={key} className="bg-gray-800 rounded-lg px-3 py-2.5">
-                  <div className="text-xs text-gray-500 mb-0.5">{STAT_LABELS[key] || key.toUpperCase()}</div>
-                  <div className="text-white font-mono font-semibold text-sm">
-                    {formatStatValue(key, val)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Hitting / Pitching Stats */}
+        <div className="bg-gray-800/50 rounded-xl p-3">
+          <EditableStatsSection
+            title={pitcher ? 'Pitching Stats' : 'Hitting Stats'}
+            stats={stats}
+            onChange={setStats}
+          />
+        </div>
+
+        {/* Defense Stats */}
+        <div className="bg-gray-800/50 rounded-xl p-3">
+          <EditableStatsSection
+            title="Defense Stats"
+            stats={defenseStats}
+            onChange={setDefenseStats}
+          />
+        </div>
 
         {/* Scout Notes */}
         <div>
