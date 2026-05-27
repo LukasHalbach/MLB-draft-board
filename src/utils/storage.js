@@ -1,4 +1,4 @@
-const KEY = 'mlb-draft-board-2025-v1'
+const KEY = 'mlb-draft-board-2026-v1'
 
 export function loadBoard() {
   try {

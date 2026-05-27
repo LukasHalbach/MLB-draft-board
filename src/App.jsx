@@ -120,7 +120,7 @@ export default function App() {
             <span className="text-2xl leading-none">⚾</span>
             <div className="min-w-0">
               <h1 className="text-lg font-bold text-white leading-tight">MLB Draft Big Board</h1>
-              <p className="text-xs text-gray-500 hidden sm:block">2025 Class · {prospects.length} prospects</p>
+              <p className="text-xs text-gray-500 hidden sm:block">2026 Draft Class · {prospects.length} prospects</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -148,7 +148,7 @@ export default function App() {
               </button>
               {showResetConfirm && (
                 <div className="absolute right-0 top-full mt-1.5 bg-gray-800 border border-gray-700 rounded-xl p-4 w-56 shadow-2xl z-50">
-                  <p className="text-sm text-gray-300 mb-3">Reset to default 2025 draft board? All grades, notes, and reordering will be lost.</p>
+                  <p className="text-sm text-gray-300 mb-3">Reset to default 2026 draft board? All grades, notes, and reordering will be lost.</p>
                   <div className="flex gap-2">
                     <button onClick={handleReset} className="flex-1 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-colors">
                       Reset
