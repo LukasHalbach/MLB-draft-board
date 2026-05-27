@@ -39,7 +39,9 @@ export default function ProspectRow({
   }
 
   const posGroup = getPositionGroup(prospect.position)
-  const { bg, text } = getGradeColor(prospect.grade)
+  const isPersonallyGraded = prospect.personalGrade != null
+  const displayGrade = isPersonallyGraded ? prospect.personalGrade : prospect.grade
+  const { bg, text } = getGradeColor(displayGrade)
   const statsLine = formatStats(prospect)
 
   return (
@@ -93,8 +95,13 @@ export default function ProspectRow({
       </button>
 
       {/* Grade badge */}
-      <div className={`shrink-0 w-9 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${bg} ${text}`}>
-        {prospect.grade || '—'}
+      <div className="shrink-0 flex flex-col items-center gap-0.5">
+        <div className={`w-9 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${bg} ${text} ${!isPersonallyGraded ? 'opacity-60' : ''}`}>
+          {displayGrade || '—'}
+        </div>
+        <span className={`text-[9px] font-bold uppercase leading-none tracking-wide ${isPersonallyGraded ? 'text-blue-500' : 'text-gray-700'}`}>
+          {isPersonallyGraded ? 'my' : 'sc'}
+        </span>
       </div>
 
       {/* Controls */}
@@ -134,7 +141,9 @@ export default function ProspectRow({
 /* Lightweight clone rendered inside DragOverlay — no hooks, no sortable context needed */
 export function ProspectRowOverlay({ prospect }) {
   const posGroup = getPositionGroup(prospect.position)
-  const { bg, text } = getGradeColor(prospect.grade)
+  const isPersonallyGraded = prospect.personalGrade != null
+  const displayGrade = isPersonallyGraded ? prospect.personalGrade : prospect.grade
+  const { bg, text } = getGradeColor(displayGrade)
 
   return (
     <div className="flex items-center gap-2 px-2 py-2 rounded-lg border bg-gray-800 border-gray-600 shadow-2xl">
@@ -149,8 +158,13 @@ export function ProspectRowOverlay({ prospect }) {
         </div>
         <div className="text-xs text-gray-500 mt-0.5 truncate">{prospect.school} · {prospect.level}</div>
       </div>
-      <div className={`shrink-0 w-9 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${bg} ${text}`}>
-        {prospect.grade || '—'}
+      <div className="shrink-0 flex flex-col items-center gap-0.5">
+        <div className={`w-9 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${bg} ${text} ${!isPersonallyGraded ? 'opacity-60' : ''}`}>
+          {displayGrade || '—'}
+        </div>
+        <span className={`text-[9px] font-bold uppercase leading-none tracking-wide ${isPersonallyGraded ? 'text-blue-500' : 'text-gray-700'}`}>
+          {isPersonallyGraded ? 'my' : 'sc'}
+        </span>
       </div>
     </div>
   )

@@ -127,6 +127,7 @@ function EditableStatsSection({ title, stats, onChange, defaultEmpty = false }) 
 export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
   const [notes, setNotes] = useState(prospect.notes || '')
   const [grade, setGrade] = useState(prospect.grade || 50)
+  const [personalGrade, setPersonalGrade] = useState(prospect.personalGrade ?? null)
   const [stats, setStats] = useState(prospect.stats || {})
   const [defenseStats, setDefenseStats] = useState(prospect.defenseStats || {})
 
@@ -134,6 +135,7 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
   useEffect(() => {
     setNotes(prospect.notes || '')
     setGrade(prospect.grade || 50)
+    setPersonalGrade(prospect.personalGrade ?? null)
     setStats(prospect.stats || {})
     setDefenseStats(prospect.defenseStats || {})
   }, [prospect.id])
@@ -164,12 +166,25 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
     return () => clearTimeout(t)
   }, [defenseStats])
 
+  // Debounce personal grade
+  useEffect(() => {
+    const t = setTimeout(() => {
+      onUpdate(prospect.id, { personalGrade })
+    }, 400)
+    return () => clearTimeout(t)
+  }, [personalGrade])
+
   const handleGradeChange = val => {
     setGrade(val)
     onUpdate(prospect.id, { grade: val })
   }
 
+  const handlePersonalGradeChange = val => {
+    setPersonalGrade(val)
+  }
+
   const { bg, text } = getGradeColor(grade)
+  const pgColors = getGradeColor(personalGrade)
   const posGroup = getPositionGroup(prospect.position)
   const pitcher = isPitcher(prospect.position)
 
@@ -203,10 +218,10 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
       </div>
 
       <div className="p-4 space-y-5 overflow-y-auto">
-        {/* Grade */}
+        {/* Scout Grade (pre-loaded) */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            OFP Grade (20–80 Scale)
+            Scout Grade (Pre-Loaded)
           </label>
           <div className="flex items-center gap-3 mb-2">
             <select
@@ -234,6 +249,53 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
             <span>50</span>
             <span>80</span>
           </div>
+        </div>
+
+        {/* My Personal Grade */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            My Personal Grade
+          </label>
+          <div className="flex items-center gap-3 mb-2">
+            <select
+              value={personalGrade ?? ''}
+              onChange={e => handlePersonalGradeChange(e.target.value === '' ? null : parseInt(e.target.value))}
+              className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+            >
+              <option value="">— Not Graded —</option>
+              {GRADE_OPTIONS.map(g => (
+                <option key={g} value={g}>{GRADE_LABELS[g]}</option>
+              ))}
+            </select>
+            {personalGrade != null ? (
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ring-2 ring-blue-500/60 ${pgColors.bg} ${pgColors.text}`}>
+                {personalGrade}
+              </div>
+            ) : (
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold shrink-0 bg-gray-800 text-gray-600 border border-dashed border-gray-700">
+                ?
+              </div>
+            )}
+          </div>
+          {personalGrade != null && (
+            <>
+              <input
+                type="range"
+                min="20" max="80" step="5"
+                value={personalGrade}
+                onChange={e => handlePersonalGradeChange(parseInt(e.target.value))}
+                className="w-full accent-blue-500 h-1.5"
+              />
+              <div className="flex justify-between text-xs text-gray-600 mt-1">
+                <span>20</span>
+                <span>50</span>
+                <span>80</span>
+              </div>
+            </>
+          )}
+          {personalGrade == null && (
+            <p className="text-xs text-gray-700 mt-1">Select a grade to mark this prospect as evaluated.</p>
+          )}
         </div>
 
         {/* Hitting / Pitching Stats */}
