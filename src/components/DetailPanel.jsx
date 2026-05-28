@@ -217,7 +217,7 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
         </button>
       </div>
 
-      <div className="p-4 space-y-5 overflow-y-auto">
+      <div className="p-4 space-y-5 overflow-y-auto flex-1 min-h-0">
         {/* Scout Grade (pre-loaded) */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
@@ -298,6 +298,21 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
           )}
         </div>
 
+        {/* Scout Notes */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            Scout Notes
+          </label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Add your scouting notes, tool grades, comp players…"
+            rows={6}
+            className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2.5 resize-none placeholder-gray-600 focus:outline-none focus:border-blue-500 leading-relaxed"
+          />
+          <p className="text-xs text-gray-600 mt-1">Auto-saves as you type</p>
+        </div>
+
         {/* Hitting / Pitching Stats */}
         <div className="bg-gray-800/50 rounded-xl p-3">
           <EditableStatsSection
@@ -314,21 +329,6 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
             stats={defenseStats}
             onChange={setDefenseStats}
           />
-        </div>
-
-        {/* Scout Notes */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Scout Notes
-          </label>
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder="Add your scouting notes, tool grades, comp players…"
-            rows={6}
-            className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2.5 resize-none placeholder-gray-600 focus:outline-none focus:border-blue-500 leading-relaxed"
-          />
-          <p className="text-xs text-gray-600 mt-1">Auto-saves as you type</p>
         </div>
 
         {/* Remove */}
