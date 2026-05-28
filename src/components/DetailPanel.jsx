@@ -217,7 +217,7 @@ export default function DetailPanel({ prospect, onUpdate, onClose, onDelete }) {
         </button>
       </div>
 
-      <div className="p-4 space-y-5 overflow-y-auto">
+      <div className="p-4 space-y-5 overflow-y-auto flex-1 min-h-0">
         {/* Scout Grade (pre-loaded) */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

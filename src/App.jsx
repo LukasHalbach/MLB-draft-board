@@ -202,7 +202,7 @@ export default function App() {
 
           {/* Detail panel */}
           {selectedProspect && (
-            <div className="w-80 xl:w-96 shrink-0 sticky top-20">
+            <div className="w-80 xl:w-96 shrink-0 sticky top-20 h-[calc(100vh-5.5rem)]">
               <DetailPanel
                 key={selectedProspect.id}
                 prospect={selectedProspect}
